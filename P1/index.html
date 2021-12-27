@@ -1,0 +1,380 @@
+</html>
+<!DOCTYPE html>
+
+<html lang="en" dir="ltr">
+
+<head>
+  <meta charset="utf-8">
+  <title>INFO 3300 project 1</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/4.0.0/github-markdown.min.css"
+    integrity="sha512-Oy18vBnbSJkXTndr2n6lDMO5NN31UljR8e/ICzVPrGpSud4Gkckb8yUpqhKuUNoE+o9gAb4O/rAxxw1ojyUVzg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/d3-queue.v3.min.js"></script>
+  <script src="https://d3js.org/d3-scale-chromatic.v3.min.js"></script>
+  <script src="https://d3js.org/d3-geo-projection.v4.min.js"></script>
+  <style>
+    .markdown-body {
+      box-sizing: border-box;
+      min-width: 200px;
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 45px;
+    }
+
+    @media (max-width: 767px) {
+      .markdown-body {
+        padding: 15px;
+      }
+    }
+
+    #mapLegend {
+      width: 800;
+      height: 2em;
+      padding-left: 0.4em;
+      padding-right: 0.3em;
+      border-radius: 1em;
+      font-size: large;
+      background: linear-gradient(90deg, rgba(13, 71, 161, 1) 0%, rgba(255, 255, 255, 1) 50%, rgba(255, 234, 0, 1) 100%);
+    }
+
+    svg {
+      border-radius: 1em;
+    }
+
+    span {
+      display: inline-block;
+      vertical-align: middle;
+      line-height: 2em;
+    }
+  </style>
+</head>
+
+<body>
+  <article class="markdown-body">
+    <h1>
+      Happiness of Western Europe <br />
+      <span style="font-size: 16pt; color: gray;">Pre-COVID vs Post-COVID</span>
+    </h1>
+
+    <!--Start Map Viz-->
+    <h2>Change in Happiness Scores Between 2021 and 2019</h2>
+    <svg id="mapSystem" width="800" height="560" style="background-color: #607D8B;"></svg><br /><br />
+    <div id="mapLegend">
+      <span>😢</span>
+      <span style="float:right;">
+        😊
+      </span>
+    </div>
+    <br /><br />
+
+    <!--Start Flag Graph-->
+    <h2>Overall Change in Happiness Scores for Countries in Western Europe Since 2019</h2>
+    <svg id="overallgraph" height=400 width=800></svg>
+    <p>
+      <blockquote>
+        Countries listed in descending order of relative rank.
+      </blockquote>
+    </p>
+    <br /><br />
+
+    <!--Star Bar Graph-->
+    <h2>Change in Generosity Pre and Post Covid</h2>
+    <svg id="trust" width=600 height=700>
+      <rect id="labelcard" x=500 y=60 width=40 height=10 style="fill: white;"></rect>
+      <text id="label" x="550" y="60" text-anchor="start" dominant-baseline="hanging"
+        style="font-size: 16px; z-index:1;"></text>
+      <rect x="490" y="85" height=20 width=20 style="fill: #388E3C"></rect>
+      <text x="520" y="100">2019</text>
+      <text x="520" y="130">2021</text>
+      <rect x="490" y="115" height=20 width=20 style="fill: #AED581"></rect>
+    </svg><br /><br />
+    <p><b>Data Collection Methodology:</b></p>
+    <p>
+      People were asked: <br />
+    <blockquote>
+      Have you donated money to a charity in the past month?
+    </blockquote>
+    Responses were 1 for yes and -1 for no
+    </p>
+    <h3>
+      Authored by:
+      <ul>
+        <span style="font-size: 14pt; color: gray;">Daniel Rusk (dgr73)</span><br />
+        <span style="font-size: 14pt; color: gray;">Kevin Sun (ks933)</span><br />
+        <span style="font-size: 14pt; color: gray;">Sarah Shin (sjs457)</span><br />
+        <span style="font-size: 14pt; color: gray;">Valeria Marqués Valdivia (vmm49)</span><br />
+      </ul>
+    </h3>
+
+    <script>
+      const mapNamesToISO = { ABW: "Aruba", AFG: "Afghanistan", AGO: "Angola", AIA: "Anguilla", ALA: "Åland Islands", ALB: "Albania", AND: "Andorra", ARE: "United Arab Emirates", ARG: "Argentina", ARM: "Armenia", ASM: "American Samoa", ATA: "Antarctica", ATF: "French Southern Territories", ATG: "Antigua and Barbuda", AUS: "Australia", AUT: "Austria", AZE: "Azerbaijan", BDI: "Burundi", BEL: "Belgium", BEN: "Benin", BES: "Bonaire, Sint Eustatius and Saba", BFA: "Burkina Faso", BGD: "Bangladesh", BGR: "Bulgaria", BHR: "Bahrain", BHS: "Bahamas", BIH: "Bosnia and Herzegovina", BLM: "Saint Barthélemy", BLR: "Belarus", BLZ: "Belize", BMU: "Bermuda", BOL: "Bolivia (Plurinational State of)", BRA: "Brazil", BRB: "Barbados", BRN: "Brunei Darussalam", BTN: "Bhutan", BVT: "Bouvet Island", BWA: "Botswana", CAF: "Central African Republic", CAN: "Canada", CCK: "Cocos (Keeling) Islands", CHE: "Switzerland", CHL: "Chile", CHN: "China", CIV: "Côte d'Ivoire", CMR: "Cameroon", COD: "Congo, Democratic Republic of the", COG: "Congo", COK: "Cook Islands", COL: "Colombia", COM: "Comoros", CPV: "Cabo Verde", CRI: "Costa Rica", CUB: "Cuba", CUW: "Curaçao", CXR: "Christmas Island", CYM: "Cayman Islands", CYP: "Cyprus", CZE: "Czech Republic", DEU: "Germany", DJI: "Djibouti", DMA: "Dominica", DNK: "Denmark", DOM: "Dominican Republic", DZA: "Algeria", ECU: "Ecuador", EGY: "Egypt", ERI: "Eritrea", ESH: "Western Sahara", ESP: "Spain", EST: "Estonia", ETH: "Ethiopia", FIN: "Finland", FJI: "Fiji", FLK: "Falkland Islands (Malvinas)", FRA: "France", FRO: "Faroe Islands", FSM: "Micronesia (Federated States of)", GAB: "Gabon", GBR: "United Kingdom", GEO: "Georgia", GGY: "Guernsey", GHA: "Ghana", GIB: "Gibraltar", GIN: "Guinea", GLP: "Guadeloupe", GMB: "Gambia", GNB: "Guinea-Bissau", GNQ: "Equatorial Guinea", GRC: "Greece", GRD: "Grenada", GRL: "Greenland", GTM: "Guatemala", GUF: "French Guiana", GUM: "Guam", GUY: "Guyana", HKG: "Hong Kong", HMD: "Heard Island and McDonald Islands", HND: "Honduras", HRV: "Croatia", HTI: "Haiti", HUN: "Hungary", IDN: "Indonesia", IMN: "Isle of Man", IND: "India", IOT: "British Indian Ocean Territory", IRL: "Ireland", IRN: "Iran", IRQ: "Iraq", ISL: "Iceland", ISR: "Israel", ITA: "Italy", JAM: "Jamaica", JEY: "Jersey", JOR: "Jordan", JPN: "Japan", KAZ: "Kazakhstan", KEN: "Kenya", KGZ: "Kyrgyzstan", KHM: "Cambodia", KIR: "Kiribati", KNA: "Saint Kitts and Nevis", KOR: "Korea, Republic of", KWT: "Kuwait", LAO: "Lao People's Democratic Republic", LBN: "Lebanon", LBR: "Liberia", LBY: "Libya", LCA: "Saint Lucia", LIE: "Liechtenstein", LKA: "Sri Lanka", LSO: "Lesotho", LTU: "Lithuania", LUX: "Luxembourg", LVA: "Latvia", MAC: "Macao", MAF: "Saint Martin (French part)", MAR: "Morocco", MCO: "Monaco", MDA: "Moldova", MDG: "Madagascar", MDV: "Maldives", MEX: "Mexico", MHL: "Marshall Islands", MKD: "North Macedonia", MLI: "Mali", MLT: "Malta", MMR: "Myanmar", MNE: "Montenegro", MNG: "Mongolia", MNP: "Northern Mariana Islands", MOZ: "Mozambique", MRT: "Mauritania", MSR: "Montserrat", MTQ: "Martinique", MUS: "Mauritius", MWI: "Malawi", MYS: "Malaysia", MYT: "Mayotte", NAM: "Namibia", NCL: "New Caledonia", NER: "Niger", NFK: "Norfolk Island", NGA: "Nigeria", NIC: "Nicaragua", NIU: "Niue", NLD: "Netherlands", NOR: "Norway", NPL: "Nepal", NRU: "Nauru", NZL: "New Zealand", OMN: "Oman", PAK: "Pakistan", PAN: "Panama", PCN: "Pitcairn", PER: "Peru", PHL: "Philippines", PLW: "Palau", PNG: "Papua New Guinea", POL: "Poland", PRI: "Puerto Rico", PRK: "Korea (Democratic People's Republic of)", PRT: "Portugal", PRY: "Paraguay", PSE: "Palestine, State of", PYF: "French Polynesia", QAT: "Qatar", REU: "Réunion", ROU: "Romania", RUS: "Russia", RWA: "Rwanda", SAU: "Saudi Arabia", SDN: "Sudan", SEN: "Senegal", SGP: "Singapore", SGS: "South Georgia and the South Sandwich Islands", SHN: "Saint Helena, Ascension and Tristan da Cunha", SJM: "Svalbard and Jan Mayen", SLB: "Solomon Islands", SLE: "Sierra Leone", SLV: "El Salvador", SMR: "San Marino", SOM: "Somalia", SPM: "Saint Pierre and Miquelon", SRB: "Serbia", SSD: "South Sudan", STP: "Sao Tome and Principe", SUR: "Suriname", SVK: "Slovakia", SVN: "Slovenia", SWE: "Sweden", SWZ: "Eswatini", SXM: "Sint Maarten (Dutch part)", SYC: "Seychelles", SYR: "Syrian Arab Republic", TCA: "Turks and Caicos Islands", TCD: "Chad", TGO: "Togo", THA: "Thailand", TJK: "Tajikistan", TKL: "Tokelau", TKM: "Turkmenistan", TLS: "Timor-Leste", TON: "Tonga", TTO: "Trinidad and Tobago", TUN: "Tunisia", TUR: "Turkey", TUV: "Tuvalu", TWN: "Taiwan, Province of China", TZA: "Tanzania, United Republic of", UGA: "Uganda", UKR: "Ukraine", UMI: "United States Minor Outlying Islands", URY: "Uruguay", USA: "United States", UZB: "Uzbekistan", VAT: "Holy See", VCT: "Saint Vincent and the Grenadines", VEN: "Venezuela (Bolivarian Republic of)", VGB: "Virgin Islands (British)", VIR: "Virgin Islands (U.S.)", VNM: "Viet Nam", VUT: "Vanuatu", WLF: "Wallis and Futuna", WSM: "Samoa", YEM: "Yemen", ZAF: "South Africa", ZMB: "Zambia", ZWE: "Zimbabwe" };
+      const westernEurope = ["Austria", "Belgium", "Czech Republic", "France", "Germany", "Ireland", "Luxembourg", "Netherlands", "Switzerland", "United Kingdom"];
+
+      // The svg
+      let mapSvg = d3.select("svg#mapSystem"),
+        mapWidth = mapSvg.attr("width"),
+        mapHeight = mapSvg.attr("height");
+
+      mapSvg.append('defs')
+        .append('pattern')
+        .attr('id', 'diagonalHatch')
+        .attr('patternUnits', 'userSpaceOnUse')
+        .attr('width', 4)
+        .attr('height', 4)
+        .append('path')
+        .attr('d', 'M-1,1 l2,-2 M0,4 l4,-4 M3,5 l2,-2')
+        .attr('stroke', '#000000b0')
+        .attr('stroke-width', 1);
+
+      // Map and projection
+      let path = d3.geoPath();
+      let projection = d3.geoMercator()
+        .scale(700)
+        .center([15, 50])
+        .translate([mapWidth / 2, mapHeight / 2]);
+
+      // ------------------------------------------------------------------------
+      // Flag SVG Visualization
+
+      let flagSvg = d3.select('svg#overallgraph');
+      const flagWidth = flagSvg.attr("width");
+      const flagHeight = flagSvg.attr("height");
+      const flagSvgMargin = { top: 10, right: 10, bottom: 20, left: 10 };
+      const chartFlagWidth = flagWidth - flagSvgMargin.left - flagSvgMargin.right;
+      const chartFlagHeight = flagHeight - flagSvgMargin.top - flagSvgMargin.bottom - 10;
+
+      let flagAnnotations = flagSvg.append("g").attr("id", "annotations");
+      let flagChartArea = flagSvg.append("g").attr("id", "points")
+        .attr("transform", "translate(" + flagSvgMargin.left + "," + flagSvgMargin.top + ")");
+
+      // ------------------------------------------------------------------------
+      // Bar SVG Visualization
+      let barSvg = d3.select("svg#trust");
+      const barWidth = barSvg.attr("width");
+      const barHeight = barSvg.attr("height");
+      const margin = {
+        top: 10,
+        right: 70,
+        bottom: 60,
+        left: 85
+      };
+      const chartBarWidth = barWidth - margin.left - margin.right;
+      const chartBarHeight = barHeight - margin.top - margin.bottom;
+      const rectBarWidth = 20;
+
+      let barAnnotations = barSvg.append("g").attr("id", "annotations");
+      let barChartArea = barSvg.append("g").attr("id", "points");
+
+      d3.json("https://raw.githubusercontent.com/holtzy/D3-graph-gallery/master/DATA/world.geojson").then((worlddata) => {
+        d3.csv('data/world-happiness-report-2019.csv').then((data2019) => {
+        d3.csv('data/world-happiness-report-2021.csv').then((data2021) => {
+
+          // Data and color scale
+          let data = new Map();
+          let colorScale = d3.scaleDiverging()
+            .domain([-0.4, 0, 0.4])
+            .range(["#0D47A1", "white", "#ffea00"]);
+
+          mapSvg.append("g")
+            .selectAll("path")
+            .data(worlddata.features)
+            .enter()
+            .append("path")
+            // draw each country
+            .attr("d", d3.geoPath()
+              .projection(projection)
+            )
+            // set the color of each country
+            .attr("fill", function (d) {
+              let d2021 = data2021.find(it => it["Country or region"] === mapNamesToISO[d.id]);
+              let d2019 = data2019.find(it => it["Country or region"] === mapNamesToISO[d.id]);
+              if (d2021 && d2019) {
+                d.total = d2021["Score"] - d2019["Score"];
+                if (westernEurope.includes(mapNamesToISO[d.id])) {
+                  console.log(d.id + ": " + d.total);
+                }
+                return colorScale(d.total);
+              }
+              return "url(#diagonalHatch)";
+            })
+            .attr("stroke", function (d) {
+              return (westernEurope.includes(mapNamesToISO[d.id])) ? "black" : null;
+            })
+            .attr("stroke-weight", function (d) {
+              return (westernEurope.includes(mapNamesToISO[d.id])) ? "8px" : null;
+            });
+
+          // ------------------------------------------------------------------------
+          // Flag SVG Visualization
+          function filterData(data) {
+            let filteredData = [];
+            for (i = 0; i < data.length; i++) {
+              entry = data[i];
+              country = entry['Country or region'];
+              if (westernEurope.includes(country)) {
+                filteredData.push(entry);
+              }
+            }
+            return filteredData;
+          };
+
+          let data2021Filter = filterData(data2021);
+          let data2019Filter = filterData(data2019);
+          let difference = [];
+          data2021Filter.forEach((d21, i) => {
+            let d19 = data2019Filter.find(it => d21['Country or region'] === it['Country or region']);
+            difference.push(d21['Score'] - d19['Score']);
+          });
+
+          let diffExtent = d3.extent(difference);
+          if (Math.abs(diffExtent[0]) > Math.abs(diffExtent[1])) {
+            let limit = Math.ceil(Math.abs(diffExtent[0]) * 50) / 50;
+          }
+          else {
+            limit = Math.ceil(Math.abs(diffExtent[1]) * 50) / 50;
+          }
+          diffExtent = [-limit, limit];
+          const xScale = d3.scaleLinear().domain(diffExtent).range([0, chartFlagWidth]);
+
+          flagSvg.append('rect')
+            .attr('opacity', 0.3)
+            .attr('x', flagSvgMargin.right + flagSvgMargin.left - 10)
+            .attr('y', flagSvgMargin.top)
+            .attr('width', chartFlagWidth / 2)
+            .attr('height', chartFlagHeight)
+            .attr('fill', '#0D47A1');
+
+          flagSvg.append('rect')
+            .attr('opacity', 0.3)
+            .attr('x', chartFlagWidth / 2 + flagSvgMargin.right + flagSvgMargin.left - 10)
+            .attr('y', flagSvgMargin.top)
+            .attr('width', chartFlagWidth / 2)
+            .attr('height', chartFlagHeight)
+            .attr('fill', '#ffea00');
+
+          let xAxis = d3.axisBottom(xScale)
+            .tickFormat(d3.format("~f"));
+
+          let xGridlines = d3.axisBottom(xScale)
+            .tickSize(-chartFlagHeight)
+            .tickFormat("");
+
+          flagAnnotations.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", "translate(" + flagSvgMargin.left + "," + (chartFlagHeight + flagSvgMargin.top) + ")")
+            .call(xGridlines);
+
+          flagAnnotations.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + flagSvgMargin.left + "," + (chartFlagHeight + flagSvgMargin.top + 10) + ")")
+            .call(xAxis);
+
+          data2021Filter.forEach((d, i) => {
+            flagSvg.append('image')
+              .data(data2021Filter)
+              .attr('id', d['Country or region'])
+              .attr('xlink:href', function (a) {
+                return ("images/" + d['Country or region'] + ".png")
+              })
+              .attr('width', 25)
+              .attr('height', 25)
+              .attr('y', (chartFlagHeight * i) / westernEurope.length + flagSvgMargin.top + 3)
+              .attr('x', xScale(difference[i]) - 12.5);
+          })
+
+          // ------------------------------------------------------------------------
+          // Bar SVG Visualization
+          let generosityExtent19 = d3.extent(data2019, d => d['Generosity']);
+          let generosityExtent21 = d3.extent(data2021, d => d['Generosity']);
+
+          // make scales
+          // Create the scale
+          let generosityScale = d3.scaleLinear().domain([-0.5, 0.5]).range([margin.left, chartBarWidth]);
+
+          var bar1 = d3.scaleBand()
+            .domain(westernEurope)
+            .range([chartBarHeight, margin.top])
+            .padding([0.8])
+
+          // make the axes
+          // X axis
+          let bottomAxis = d3.axisBottom(generosityScale)
+            .tickFormat(d3.format("")) // exact value without commas
+          let bottomGridlines = d3.axisBottom(generosityScale).ticks(20)
+            .tickSize(-chartBarHeight - 10)
+            .tickFormat("");
+          barAnnotations.append("g")
+            .attr("class", "x axis")
+            .attr("transform", "translate(" + 0 + "," + (chartBarHeight + margin.top + 10) + ")")
+            .call(bottomAxis);
+          barAnnotations.append("g")
+            .attr("class", "x gridlines")
+            .attr("transform", "translate(" + 0 + "," + (chartBarHeight + margin.top + 10) + ")")
+            .call(bottomGridlines);
+
+          barAnnotations.selectAll("line")
+            .style("stroke", "lightgrey");
+
+          // Y axis
+          barSvg
+            .append("g")
+            .attr("transform", "translate(" + (margin.left) + "," + (4) + ")") // This controls the vertical position of the Axis
+            .call(d3.axisLeft(bar1));
+
+          barAnnotations.append("text")
+            .attr("class", "x label")
+            .attr("text-anchor", "center")
+            .attr("x", chartBarWidth / 2)
+            .attr("y", barHeight - 10)
+            .text("Generosity");
+
+          barAnnotations.append("text")
+            .attr("class", "y label")
+            .attr("text-anchor", "end")
+            .attr("y", 5)
+            .attr("x", -chartBarHeight / 2)
+            .attr("dy", ".6em")
+            .attr("transform", "rotate(-90)")
+            .text("Country");
+
+          // plot the bars
+          data2021.forEach((d, i) => {
+            if (westernEurope.includes(d["Country or region"])) {
+              let rect = barChartArea.append("rect")
+                .attr('x', margin.left)
+                .attr('y', bar1(d["Country or region"]) + (rectBarWidth / 2))
+                .attr('width', generosityScale(d["Generosity"]) - margin.left)
+                .attr('height', 20)
+                .attr('stroke', 'grey')
+                .attr('fill', '#C5E1A5');
+              if (d["Generosity"] == 0) {
+                rect.attr("BarWidth", 2);
+              }
+
+              console.log(d["Country or region"] + " 2021 generosity: " + d['Generosity']);
+            }
+          });
+
+          data2019.forEach((d, i) => {
+            if (westernEurope.includes(d["Country or region"])) {
+              let rect = barChartArea.append("rect")
+                .attr('x', margin.left)
+                .attr('y', bar1(d["Country or region"]) - (rectBarWidth / 2))
+                .attr('width', generosityScale(d["Generosity"]) - margin.left)
+                .attr('height', 20)
+                .attr('stroke', 'grey')
+                .attr('fill', '#388E3C');
+
+                console.log(d["Country or region"] + " 2019 generosity: " + d['Generosity']);
+            }
+          });
+        });
+      }); });
+
+    </script>
+
+  </article>
+</body>
+
+</html>
